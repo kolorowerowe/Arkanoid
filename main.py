@@ -254,6 +254,7 @@ class Ball():
                                 game.music.playPunch()
                             game.brick_time[j+i*game.brick_columns]=time.time()
                             stats.last_hit=time.time()
+                            break
 
     def draw(self):
         pygame.draw.circle(game.screen,self.circle_color,[int(self.circle_x),int(self.circle_y)],self.circle_radius,0)
