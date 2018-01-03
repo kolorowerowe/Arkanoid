@@ -26,11 +26,12 @@ STATE_MENU_PREMIUM=5
 STATE_BALL_IN_PADDLE=6
 STATE_PLAY=7
 STATE_NEXT_LVL=8
-STATE_GAME_OVER=9
-STATE_WON=10
-STATE_SURE_TO_MENU=11
-STATE_SURE_TO_QUIT=12
-STATE_OUTRO=13
+STATE_BALL_OUT=9
+STATE_GAME_OVER=10
+STATE_WON=11
+STATE_SURE_TO_MENU=12
+STATE_SURE_TO_QUIT=13
+STATE_OUTRO=14
 
 class Arrows():
     def __init__(self):
@@ -219,7 +220,7 @@ class Ball():
                 return 2
             elif deltaY==0:
                 return 1
-            elif (math.fabs(deltaX-deltaY)<20) and ((self.circle_V[0]>0 and self.circle_x<rect.x) or (self.circle_V[0]<0 and self.circle_x>rect.x)):
+            elif (math.fabs(deltaX-deltaY)<10) and ((self.circle_V[0]>0 and self.circle_x<rect.x) or (self.circle_V[0]<0 and self.circle_x>rect.x)):
                     return 3
             elif math.fabs(deltaX)>=math.fabs(deltaY):
                 return 1
@@ -420,7 +421,7 @@ class Bonus():
 class Game():
     def __init__(self):        
         #inicjaliza=acja ekranu
-        self.game_ver="7.12.27"
+        self.game_ver="8.1.3"
         self.activeBot=False
         self.time_start=time.time()
         self.music=music.Music()
@@ -587,10 +588,11 @@ class Game():
         self.acc*=0
             
     def loose(self):
-        if self.ball.circle_y+self.ball.circle_radius>self.paddle_y+self.paddle_height :
+        if self.ball.circle_y+self.ball.circle_radius>self.paddle_y+self.paddle_height:
             stats.lives-=1
             if stats.lives>0:
-                self.state=STATE_BALL_IN_PADDLE
+                self.state=STATE_BALL_OUT
+                self.time_start=time.time()
             else:
                 if self.music.music_effects:
                     self.music .playFail()
@@ -692,6 +694,9 @@ class Game():
              stats.f.write(str(stats.points))
     
     def intro(self):
+        keys=pygame.key.get_pressed()
+        if keys[pygame.K_SPACE]:
+            self.state=STATE_MENU_MAIN
         frame=int((time.time()-self.time_start)*10)
         if frame<=33:
             self.screen.blit(self.img_intro[frame],(140,0))
@@ -919,6 +924,10 @@ class Game():
                     self.onThePaddle()
                     if self.activeBot:
                         self.state=STATE_PLAY
+                        
+                if self.state==STATE_BALL_OUT:
+                    if time.time()-self.time_start>1:
+                        self.state=STATE_BALL_IN_PADDLE
                 
                 if self.state==STATE_GAME_OVER:
                     if time.time()-self.time_start<3:
